@@ -1,0 +1,11 @@
+Building a side scroller video game
+===================================
+Goal: duplicate the functionality present in NES Mario
+
+Thoughts
+========
+- Build an object oriented video game
+- Complete the project
+- Have a project I can show off a bit
+- Want to contrast .NET experience
+- wou
