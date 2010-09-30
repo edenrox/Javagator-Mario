@@ -8,21 +8,11 @@ public class SoundPlayer implements Runnable {
 	
 	public static final String PathToSounds = "C:\\Users\\Ian\\projects\\Icadev\\SideScroller\\sounds\\";
 	
-	private TargetDataLine m_line;
 	private HashMap<String, AudioInputStream> m_ais;
 	
 	public SoundPlayer() {
 		m_ais = new HashMap<String, AudioInputStream>();
-		
-		Port.Info info = Port.Info.SPEAKER;
-		if (AudioSystem.isLineSupported(info)) {
-			try {
-				m_line = (TargetDataLine) AudioSystem.getLine(info);
-				m_line.open();
-			} catch (Exception ex) {
-				System.err.println("Error openning audio system: " + ex.toString());
-			}
-		}
+
 	}
 
 	public void run() {

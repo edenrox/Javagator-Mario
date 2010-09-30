@@ -48,6 +48,17 @@ public class RangeTree {
 			}
 		}
 	}
+	public Vector<Sprite> getRange(int x1, int x2) {
+		SortedMap<Integer, Vector<Sprite>> subtree = m_tree.subMap(new Integer(x1),new Integer(x2));
+		Vector<Sprite> rv = new Vector<Sprite>();
+		for(Vector<Sprite> list_item : subtree.values()) {
+			for (Sprite item : list_item) {
+				rv.add(item);
+			}
+		}
+		return rv;
+	}
+	
 	public Vector<Sprite> get(int x) {
 		Integer key = new Integer(x);
 		if (m_tree.containsKey(key)) {

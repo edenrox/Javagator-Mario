@@ -1,5 +1,6 @@
 package com.hopkins.game.mario.sprite.tiles;
 
+import com.hopkins.game.mario.sprite.Position;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteFactory;
 
@@ -22,9 +23,9 @@ public class QuestionBox extends Block {
 		return "tiles/block-question.png";
 	}
 	
-	public boolean onCollision(Sprite that) {
+	public boolean onCollision(Sprite that, Position collisionVector) {
 		if (m_quantity < 1) {
-			return super.onCollision(that);
+			return super.onCollision(that, collisionVector);
 		}
 		
 		// create the new item

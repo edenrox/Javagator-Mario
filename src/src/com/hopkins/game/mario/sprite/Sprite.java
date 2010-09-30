@@ -32,7 +32,7 @@ public abstract class Sprite {
 		return 6;
 	}
 	
-	public boolean onCollision(Sprite that) {
+	public boolean onCollision(Sprite that, Position collisionVector) {
 		return (that.isSolid());
 	}
 	public boolean isSolid() {

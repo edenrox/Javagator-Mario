@@ -1,6 +1,7 @@
 package com.hopkins.game.mario.sprite.powerups;
 
 import com.hopkins.game.mario.GameState;
+import com.hopkins.game.mario.sprite.Position;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.player.PlayerState;
 
@@ -17,8 +18,8 @@ public class Mushroom extends Collectable {
 		}
 	}
 	
-	public boolean onCollision(Sprite that) {
-		boolean rv = super.onCollision(that);
+	public boolean onCollision(Sprite that, Position collisionVector) {
+		boolean rv = super.onCollision(that, collisionVector);
 		if (rv) {
 			// reverse vector
 		}

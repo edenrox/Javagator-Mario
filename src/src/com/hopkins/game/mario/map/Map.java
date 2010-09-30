@@ -43,8 +43,11 @@ public class Map {
 		m_tree.remove(item);
 	}
 	
-	public void executeRender(int x1, int x2, SpriteCallback func, Object data) {
+	public void iterateRange(int x1, int x2, SpriteCallback func, Object data) {
 		m_tree.iterateRange(x1, x2, func, data);
+	}
+	public Vector<Sprite> getRange(int x1, int x2) {
+		return m_tree.getRange(x1, x2);
 	}
 	
 	public int distanceFromGround(Sprite item) {

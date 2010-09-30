@@ -78,7 +78,7 @@ public class MainRenderer implements Renderer {
 			}
 		};
 		
-		m_map.executeRender(m_visible.x - Sprite.TileWidth, m_visible.x + m_visible.width, func, null);
+		m_map.iterateRange(m_visible.x - Sprite.TileWidth, m_visible.x + m_visible.width, func, null);
 	}
 	
 	private void renderSprites(Graphics2D g) {

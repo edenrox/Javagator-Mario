@@ -55,7 +55,7 @@ public class RenderManager extends JPanel implements SpriteCallback {
 		g.fillRect(0, 13 * Sprite.TileHeight, w, h);
 		
 		// render the map
-		GameState.getCurrent().getMap().executeRender(m_renderWindow.x - Sprite.TileWidth, m_renderWindow.x + m_renderWindow.width, this, g);
+		GameState.getCurrent().getMap().iterateRange(m_renderWindow.x - Sprite.TileWidth, m_renderWindow.x + m_renderWindow.width, this, g);
 		
 		// render the active sprites
 		for(Sprite item : GameState.getCurrent().getActiveSprites()) {
