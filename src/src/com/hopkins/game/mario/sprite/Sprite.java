@@ -2,6 +2,8 @@ package com.hopkins.game.mario.sprite;
 
 import java.awt.Image;
 
+import com.hopkins.game.mario.events.GameEventType;
+
 
 public abstract class Sprite {
 	public static final int TileWidth = 16;
@@ -27,13 +29,12 @@ public abstract class Sprite {
 		m_velocity = new Position();
 		m_size = new Size();
 	}
-	
 	public int getMaxVelocity() {
 		return 6;
 	}
 	
-	public boolean onCollision(Sprite that, Position collisionVector) {
-		return (that.isSolid());
+	public GameEventType onCollision(Sprite that, Position collisionVector) {
+		return (this.isSolid()) ? GameEventType.PreventCollision : GameEventType.NoEvent;
 	}
 	public boolean isSolid() {
 		return true;

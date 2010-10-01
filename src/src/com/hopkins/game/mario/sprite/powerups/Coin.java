@@ -11,9 +11,4 @@ public class Coin extends Collectable {
 	public boolean isGravityEffected() {
 		return false;
 	}
-	
-	public void onCollect() {
-		GameState.getCurrent().collectCoin();
-	}
-
 }

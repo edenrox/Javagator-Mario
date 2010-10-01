@@ -9,9 +9,11 @@ public class SoundPlayer implements Runnable {
 	public static final String PathToSounds = "C:\\Users\\Ian\\projects\\Icadev\\SideScroller\\sounds\\";
 	
 	private HashMap<String, AudioInputStream> m_ais;
+	private Clip m_lastClip;
 	
 	public SoundPlayer() {
 		m_ais = new HashMap<String, AudioInputStream>();
+		m_lastClip = null;
 
 	}
 
@@ -24,11 +26,15 @@ public class SoundPlayer implements Runnable {
 		if (!m_ais.containsKey(path)) {
 			 load(path);
 		}
+		if (m_lastClip != null) {
+			m_lastClip.stop();
+		}
 		try {
 			Clip clip = AudioSystem.getClip();
 			clip.open(m_ais.get(path));
 			clip.setFramePosition(0);
 			clip.start();
+
 		} catch (Exception ex) {
 			System.err.println("Error, could not play audio: " + path + " " + ex.toString());
 		}

@@ -9,16 +9,4 @@ public class OneUp extends Collectable {
 	public String getSpriteFile() {
 		return "powerups/oneup";
 	}
-	
-	public void onCollect() {
-		GameState.getCurrent().collectOneUp();
-	}
-	
-	public boolean onCollision(Sprite that, Position collisionVector) {
-		boolean rv = super.onCollision(that, collisionVector);
-		if (rv) {
-			// reverse vector
-		}
-		return rv;
-	}
 }

@@ -7,9 +7,5 @@ public class Star extends Collectable {
 	public String getSpriteFile() {
 		return "powerups/star.png";
 	}
-	
-	public void onCollect() {
-		//GameState.getCurrent().collectStar();
-	}
 
 }

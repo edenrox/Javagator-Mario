@@ -14,6 +14,7 @@ public class Pipe extends ImageSprite {
 	private Image m_image;
 
 	public Pipe(int height) {
+		super();
 		m_height = height;
 		this.getSize().set(TileWidth * 2, TileHeight * (m_height + 1));
 	}
@@ -24,6 +25,10 @@ public class Pipe extends ImageSprite {
 	
 	public boolean isGravityEffected() {
 		return false;
+	}
+	
+	public boolean isSolid() {
+		return true;
 	}
 
 	public Image getImage() {

@@ -1,9 +1,11 @@
 package com.hopkins.game.mario.events;
 
 public enum GameEventType {
+	NoEvent,PreventCollision,
 	SpawnPowerup,BrickBreak,
-	CollectCoin,CollectMushroom,CollectFlower,CollectOneUp,CollectStar,
+	Collect,
 	Jump,
 	TouchBadGuy,StompBadGuy,Bounce,
-	LevelComplete,PipeEnter,PipeExit
+	LevelComplete,PipeEnter,PipeExit,
+	Death,
 }

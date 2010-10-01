@@ -1,5 +1,6 @@
 package com.hopkins.game.mario.sprite.tiles;
 
+import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.sprite.Position;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteFactory;
@@ -23,7 +24,7 @@ public class QuestionBox extends Block {
 		return "tiles/block-question.png";
 	}
 	
-	public boolean onCollision(Sprite that, Position collisionVector) {
+	public GameEventType onCollision(Sprite that, Position collisionVector) {
 		if (m_quantity < 1) {
 			return super.onCollision(that, collisionVector);
 		}
@@ -32,7 +33,7 @@ public class QuestionBox extends Block {
 		m_creating = SpriteFactory.create(m_contains);
 		m_creating.getPosition().copy(this.getPosition());
 		
-		return true;
+		return GameEventType.PreventCollision;
 	}
 	
 	public boolean isGravityEffected() {

@@ -4,15 +4,16 @@ import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.Vector;
 
+import com.hopkins.game.mario.events.GameEventManager;
+import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.map.Map;
-import com.hopkins.game.mario.sprite.Position;
-import com.hopkins.game.mario.sprite.Size;
-import com.hopkins.game.mario.sprite.Sprite;
-import com.hopkins.game.mario.sprite.SpriteCallback;
+import com.hopkins.game.mario.sprite.*;
+import com.hopkins.game.mario.sprite.powerups.Coin;
+import com.hopkins.game.mario.sprite.tiles.Pipe;
 
 public class MovementManager {
 	
-	public static final int GRAVITY_FORCE = 5;
+	public static final int GRAVITY_FORCE = 1;
 	
 	private Position m_gravityFV;
 	private Position m_dragFV;
@@ -41,25 +42,29 @@ public class MovementManager {
 	private boolean isInCollision(Sprite itemA, Position newPosA, Sprite itemB) {
 		Rectangle rectA = new Rectangle(newPosA.getX(), newPosA.getY(), itemA.getSize().getWidth(), itemA.getSize().getHeight());
 		Rectangle rectB = new Rectangle(itemB.getPosition().getX(), itemB.getPosition().getY(), itemB.getSize().getWidth(), itemB.getSize().getHeight());
+		
 		return rectA.intersects(rectB);
 	}
 	
 	private Position getCollisionVector(Sprite itemA, Sprite itemB) {
 		Position collisionVector = new Position();
-		if (itemA.getTop() < itemB.getBottom()) {
-			collisionVector.setY(1);
-		} else if (itemA.getBottom() > itemB.getTop()) {
-			collisionVector.setY(-1);
+		
+		// we are below, but our top is above this items bottom
+		if ((itemA.getTop() <= itemB.getBottom()) && (itemA.getBottom() >= itemB.getBottom())) {
+			collisionVector.setY(itemB.getBottom() - itemA.getTop());
+		} else if ((itemA.getBottom() >= itemB.getTop()) && (itemA.getTop() <= itemB.getTop())) {
+			collisionVector.setY(itemB.getTop() - itemA.getBottom());
 		}
 		if (itemA.getRight() < itemB.getLeft()) {
-			collisionVector.setX(1);
+			collisionVector.setX(itemB.getLeft() - itemA.getRight());
 		} else if (itemA.getLeft() > itemB.getRight()) {
-			collisionVector.setX(-1);
+			collisionVector.setX(itemB.getRight() - itemA.getLeft());
 		}
 		return collisionVector;
 	}
 	
-	private void checkCollisions(Sprite item, Map map) {
+	private boolean checkCollisions(Sprite item, Map map, GameEventManager gem) {
+		boolean rv = false;
 		Position collisionVector = null;
 		Position newpos = new Position();
 		newpos.copy(item.getPosition());
@@ -70,20 +75,33 @@ public class MovementManager {
 		
 		Vector<Sprite> sprites = map.getRange(minX, maxX);
 		for(Sprite that : sprites) {
-			if (that.isSolid()) {
-				if (isInCollision(item, newpos, that)) {
-					collisionVector = getCollisionVector(item, that);
-					
+			if (isInCollision(item, newpos, that)) {
+				collisionVector = getCollisionVector(item, that);
+				if (that.getClass() == Coin.class) {
+					System.err.println(String.format("CV: {x: %d, y: %d}", collisionVector.getX(), collisionVector.getY()));
 				}
+				GameEventType ev = that.onCollision(item, collisionVector);
+				if (ev == GameEventType.PreventCollision) {
+					if (Math.abs(collisionVector.getX()) > Math.abs(collisionVector.getY())) {
+						item.getVelocity().setX(0);
+					} else {
+						item.getVelocity().setY(0);
+					}
+				} else if (ev != GameEventType.NoEvent) {
+					gem.fireEvent(ev, that);
+				}
+				
 			}
+			
 		}
+		return rv;
 	}
 	private void applyGravity(Sprite item) {
 		item.applyForce(m_gravityFV);
 	}
 	
 	private void applyDrag(Sprite item) {
-		m_dragFV.setX((int) (-0.5 * item.getVelocity().getX()));
+		m_dragFV.setX((int) Math.round(-0.5 * item.getVelocity().getX()));
 		item.applyForce(m_dragFV);
 	}
 	
@@ -94,11 +112,12 @@ public class MovementManager {
 		}
 	}
 	
-	public void applyForcesAndVelocities(Collection<Sprite> sprites, Map map) {
+	public void applyForcesAndVelocities(Collection<Sprite> sprites, Map map, GameEventManager gem) {
 		for(Sprite item : sprites) {
+			// limit velocities, check for collisions, then apply velocities
 			applyGravity(item);
 			limitVelocity(item);
-			checkCollisions(item, map);
+			checkCollisions(item, map, gem);
 			item.applyVelocity();
 		}
 	}

@@ -1,6 +1,6 @@
 package com.hopkins.game.mario.sprite.powerups;
 
-import com.hopkins.game.mario.GameState;
+import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.sprite.ImageSprite;
 import com.hopkins.game.mario.sprite.Position;
 import com.hopkins.game.mario.sprite.Sprite;
@@ -11,14 +11,10 @@ public abstract class Collectable extends ImageSprite {
 		return false;
 	}
 	
-	public boolean onCollision(Sprite that, Position collisionVector) {
+	public GameEventType onCollision(Sprite that, Position collisionVector) {
 		if (that.getClass() == Player.class) {
-			GameState gs = GameState.getCurrent();
-			gs.getMap().remove(this);
-			onCollect();
+			return GameEventType.Collect;
 		}
-		return false;
+		return GameEventType.NoEvent;
 	}
-	
-	public abstract void onCollect();
 }

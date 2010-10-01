@@ -22,6 +22,8 @@ public class Level1 {
 		item.getPosition().set(6 * Sprite.TileWidth, 12 * Sprite.TileHeight);
 		m_map.addPlayer(item);
 		
+		testing(); 
+		
 		buildGround();
 		
 		buildBackground();
@@ -31,6 +33,12 @@ public class Level1 {
 		buildArea2();
 		
 		buildArea3();
+	}
+	
+	private void testing() {
+		m_map.create("coin", 3, 10);
+		m_map.create("coin", 4, 10);
+		m_map.create("coin", 4, 10);
 	}
 	
 	private void buildBackground() {
