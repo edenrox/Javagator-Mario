@@ -15,6 +15,9 @@ public class SpriteFactory {
 		if (name.equals("oneup")) {
 			return new OneUp();
 		}
+		if (name.equals("start")) {
+			return new Star();
+		}
 		if (name.equals("coin")) {
 			return new Coin();
 		}

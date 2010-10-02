@@ -1,0 +1,7 @@
+.cache
+.project
+.settings
+.metadata
+.buildpath
+*~
+src/bin/
