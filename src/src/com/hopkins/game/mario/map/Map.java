@@ -1,72 +1,43 @@
 package com.hopkins.game.mario.map;
 
-import java.util.Vector;
-
+import java.util.Collection;
+import java.util.TreeMap;
 import com.hopkins.game.mario.sprite.Sprite;
-import com.hopkins.game.mario.sprite.SpriteCallback;
-import com.hopkins.game.mario.sprite.SpriteFactory;
-import com.hopkins.game.mario.sprite.player.Player;
+import com.hopkins.game.mario.sprite.tiles.Tile;
+import com.hopkins.game.mario.sprite.tiles.TileFactory;
 
 public class Map {
 	
-	private RangeTree m_tree;
-	private Player m_player;
+	private TreeMap<Integer, Tile> m_tree;
 	
 	public Map() {
-		m_tree = new RangeTree();
+		m_tree = new TreeMap<Integer, Tile>();
 	}
 	
-	public void addPlayer(Player item) {
-		m_player = item;
-		//add(item);
+	private Integer getKey(int x, int y) {
+		return new Integer(x * 1000 + y);
 	}
-	public Player getPlayer() {
-		return m_player;
+	private Integer getKey(Tile item) {
+		return getKey(item.getX(), item.getY());
 	}
 
-	public void add(Sprite item) {
-		m_tree.add(item);
+	
+	public void add(Tile item) {
+		m_tree.put(getKey(item), item);
 	}
-	public void add(Sprite item, int x, int y) {
-		item.getPosition().set(x * Sprite.TileWidth, y * Sprite.TileHeight);
+	public void add(Tile item, int x, int y) {
+		item.setLocation(x * Sprite.TILE_WIDTH, y * Sprite.TILE_HEIGHT);
 		add(item);
 	}
 	public void create(String name, int x, int y) {
-		add(SpriteFactory.create(name), x, y);
-	}
-	public void move(int oldX, Sprite item) {
-		m_tree.remove(oldX, item);
-		m_tree.add(item);
+		add(TileFactory.create(name), x, y);
 	}
 	
-	public void remove(Sprite item) {
-		m_tree.remove(item);
+	public void remove(Tile item) {
+		m_tree.remove(getKey(item));
 	}
 	
-	public void iterateRange(int x1, int x2, SpriteCallback func, Object data) {
-		m_tree.iterateRange(x1, x2, func, data);
-	}
-	public Vector<Sprite> getRange(int x1, int x2) {
-		return m_tree.getRange(x1, x2);
-	}
-	
-	public int distanceFromGround(Sprite item) {
-		int x1 = (int) (Math.floor((double) item.getLeft() / 16) * 16);
-		int x2 = (int) (Math.ceil((double) item.getLeft() / 16) * 16);
-		int y = item.getBottom();
-		int distance = 10000; 
-		Vector<Sprite> sprites = m_tree.get(x1);
-		if (x2 != x1) {
-			sprites.addAll(m_tree.get(x2));
-		}
-		for(Sprite compare : sprites) {
-			if (compare.isSolid()) {
-			int dx = compare.getPosition().getY() - y;
-				if (dx >= 0) {
-					distance = Math.min(dx, distance);
-				}
-			}
-		}
-		return distance;
+	public Collection<Tile> getRange(int x1, int x2) {
+		return m_tree.subMap(getKey(x1, 0), getKey(x2, 0)).values();
 	}
 }

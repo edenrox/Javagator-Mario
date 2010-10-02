@@ -1,39 +1,48 @@
 package com.hopkins.game.mario.sprite;
 
-import java.awt.Image;
-
+import java.awt.Point;
+import java.awt.Rectangle;
 import com.hopkins.game.mario.events.GameEventType;
+import com.hopkins.game.mario.graphics.Renderable;
 
+public abstract class Sprite implements Renderable {
 
-public abstract class Sprite {
-	public static final int TileWidth = 16;
-	public static final int TileHeight = 16;
+	public static final int TILE_WIDTH = 16;
+	public static final int TILE_HEIGHT = 16;
 	
-	private Position m_position;
-	private Position m_velocity;
-	private Size m_size;
-	
-	
-	
-	public int getLeft() { return m_position.getX(); }
-	public int getRight() { return m_position.getX() + m_size.getWidth(); }
-	public int getTop() { return m_position.getY(); }
-	public int getBottom() { return m_position.getY() + m_size.getHeight(); }
-	
-	public Position getPosition() { return m_position; }
-	public Position getVelocity() { return m_velocity; }
-	public Size getSize() { return m_size; }
-	
+	private Rectangle m_bounds;
+	private Point m_velocity;
+
 	public Sprite() {
-		m_position = new Position();
-		m_velocity = new Position();
-		m_size = new Size();
+		m_bounds = new Rectangle(0,0, TILE_WIDTH, TILE_HEIGHT);
+		m_velocity = new Point(0,0);
 	}
+	public Point getVelocity() {
+		return m_velocity;
+	}
+	public Rectangle getBounds() {
+		return m_bounds;
+	}
+	public void setLocation(int x, int y) {
+		m_bounds.x = x;
+		m_bounds.y = y;
+	}
+	public void setSize(int width, int height) {
+		m_bounds.width = width;
+		m_bounds.height = height;
+	}
+	public int getX() {
+		return m_bounds.x;
+	}
+	public int getY() {
+		return m_bounds.y;
+	}
+	
 	public int getMaxVelocity() {
 		return 6;
 	}
 	
-	public GameEventType onCollision(Sprite that, Position collisionVector) {
+	public GameEventType onCollision(Sprite that, Point collisionVector) {
 		return (this.isSolid()) ? GameEventType.PreventCollision : GameEventType.NoEvent;
 	}
 	public boolean isSolid() {
@@ -42,18 +51,12 @@ public abstract class Sprite {
 	public boolean isGravityEffected() {
 		return true;
 	}
-	
-	public boolean isActive() {
-		return false;
-	}
-	
-	public Image getImage() {
-		return null;
-	}
-	public void applyForce(Position forceVector) {
-		getVelocity().add(forceVector);
+	public void applyForce(Point forceVector) {
+		m_velocity.x += forceVector.x;
+		m_velocity.y += forceVector.y;
 	}
 	public void applyVelocity() {
-		getPosition().add(getVelocity());
+		m_bounds.x += m_velocity.x;
+		m_bounds.y += m_velocity.y;
 	}
 }

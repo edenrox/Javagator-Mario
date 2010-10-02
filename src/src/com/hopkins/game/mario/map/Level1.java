@@ -2,9 +2,6 @@ package com.hopkins.game.mario.map;
 
 import java.util.Arrays;
 
-import com.hopkins.game.mario.sprite.*;
-import com.hopkins.game.mario.sprite.player.Player;
-import com.hopkins.game.mario.sprite.player.PlayerState;
 import com.hopkins.game.mario.sprite.tiles.*;
 
 public class Level1 {
@@ -16,11 +13,6 @@ public class Level1 {
 	
 	public Level1() {
 		m_map = new Map();
-		
-		// place the player
-		Player item = new Player(0, PlayerState.Small);
-		item.getPosition().set(6 * Sprite.TileWidth, 12 * Sprite.TileHeight);
-		m_map.addPlayer(item);
 		
 		testing(); 
 		
@@ -66,6 +58,7 @@ public class Level1 {
 		addQuestionBlock(16, 9, "coin");
 		m_map.create("brick", 20, 9);
 		addQuestionBlock(21, 9, "mushroom");
+		m_map.add(TileFactory.createSpawn("goomba"), 21, 12);
 		addQuestionBlock(22, 5, "coin");
 		m_map.create("brick", 22, 9);
 		addQuestionBlock(23, 9, "coin");
@@ -74,8 +67,11 @@ public class Level1 {
 		addPipe(28, 11, 2);
 		addPipe(38, 10, 3);
 		
-		
+		m_map.add(TileFactory.createSpawn("goomba"), 41, 12);
 		addPipe(46, 9, 4);
+		m_map.add(TileFactory.createSpawn("goomba"), 53, 12);
+		m_map.add(TileFactory.createSpawn("goomba"), 54, 12);
+		
 		addPipe(57, 9, 4);
 		addQuestionBlock(64, 8, "oneup");
 	}
@@ -86,11 +82,13 @@ public class Level1 {
 		m_map.create("brick", 79, 9);
 		
 		for(int i = 0; i < 8; i++) {
-			m_map.add(SpriteFactory.create("brick"), 80 + i, 5);
+			m_map.create("brick", 80 + i, 5);
 		}
 		m_map.create("brick", 91, 5);
+		m_map.add(TileFactory.createSpawn("goomba"), 91, 4);
 		m_map.create("brick", 92, 5);
 		m_map.create("brick", 93, 5);
+		m_map.add(TileFactory.createSpawn("goomba"), 93, 4);
 		addQuestionBlock(94, 5, "coin");
 		addQuestionBlock(94, 9, "coin", 12);
 		m_map.create("brick", 100, 9);
@@ -175,13 +173,16 @@ public class Level1 {
 	
 	private void buildGround() {
 		int[] skip = new int[] {67,68,69,70, 86, 87, 88, 153, 154};
-		Block item;
+		Tile item;
 		for(int i = 0; i < 212; i++) {
 			if (Arrays.binarySearch(skip, i) < 1) {
 				for (int j = 13; j < 15; j++) {
 					item = new Block(BlockColor.Wood);
 					m_map.add(item, i, j);
 				}
+			} else {
+				item = new PitDeath();
+				m_map.add(item, i, 14);
 			}
 			
 		}

@@ -1,98 +1,110 @@
 package com.hopkins.game.mario.movement;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Collection;
-import java.util.Vector;
 
 import com.hopkins.game.mario.events.GameEventManager;
 import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.map.Map;
 import com.hopkins.game.mario.sprite.*;
-import com.hopkins.game.mario.sprite.powerups.Coin;
-import com.hopkins.game.mario.sprite.tiles.Pipe;
+import com.hopkins.game.mario.sprite.tiles.Coin;
+import com.hopkins.game.mario.sprite.tiles.Tile;
 
 public class MovementManager {
 	
 	public static final int GRAVITY_FORCE = 1;
 	
-	private Position m_gravityFV;
-	private Position m_dragFV;
+	private Point m_gravityFV;
+	private Point m_dragFV;
+	private Tile[] m_tiles;
 	
 	public MovementManager() {
-		m_gravityFV = new Position(0, GRAVITY_FORCE);
-		m_dragFV = new Position(0, GRAVITY_FORCE);
+		m_gravityFV = new Point(0, GRAVITY_FORCE);
+		m_dragFV = new Point(0, 0);
+		m_tiles = new Tile[10];
 	}
 	
 	private void limitVelocity(Sprite item) {
 		int maxV = item.getMaxVelocity();
 		int nMaxV = -1 * maxV;
-		Position v = item.getVelocity();
+		Point v = item.getVelocity();
 		if (v.getX() > maxV) {
-			v.setX(maxV);
+			v.x = maxV;
 		} else if (v.getX() < nMaxV) {
-			v.setX(nMaxV);
+			v.x = nMaxV;
 		}
 		if (v.getY() > maxV) {
-			v.setY(maxV);
+			v.y = maxV;
 		} else if (v.getY() < nMaxV) {
-			v.setY(nMaxV);
+			v.y = nMaxV;
 		}
 	}
 	
-	private boolean isInCollision(Sprite itemA, Position newPosA, Sprite itemB) {
-		Rectangle rectA = new Rectangle(newPosA.getX(), newPosA.getY(), itemA.getSize().getWidth(), itemA.getSize().getHeight());
-		Rectangle rectB = new Rectangle(itemB.getPosition().getX(), itemB.getPosition().getY(), itemB.getSize().getWidth(), itemB.getSize().getHeight());
+	private boolean isInCollision(Sprite itemA, Point newPosA, Sprite itemB) {
+		if (itemB == null) {
+			return false;
+		}
+		Rectangle rectA = new Rectangle(newPosA.x, newPosA.y, itemA.getBounds().width, itemA.getBounds().height);
+		Rectangle rectB = new Rectangle(itemB.getX(), itemB.getY(), itemB.getBounds().width, itemB.getBounds().height);
 		
 		return rectA.intersects(rectB);
 	}
 	
-	private Position getCollisionVector(Sprite itemA, Sprite itemB) {
-		Position collisionVector = new Position();
+	
+	private Point getCollisionVector(Rectangle rectA, Rectangle rectB) {
+		Point collisionVector = new Point();
 		
 		// we are below, but our top is above this items bottom
-		if ((itemA.getTop() <= itemB.getBottom()) && (itemA.getBottom() >= itemB.getBottom())) {
-			collisionVector.setY(itemB.getBottom() - itemA.getTop());
-		} else if ((itemA.getBottom() >= itemB.getTop()) && (itemA.getTop() <= itemB.getTop())) {
-			collisionVector.setY(itemB.getTop() - itemA.getBottom());
+		if ((rectA.y <= rectB.getMaxY()) && (rectA.getMaxY() >= rectB.getMaxY())) {
+			collisionVector.y = (int) (rectB.getMaxY() - rectA.y);
+		} else if ((rectA.getMaxY() >= rectB.getY()) && (rectA.y <= rectB.y)) {
+			collisionVector.y = (int) (rectB.getY() - rectA.getMaxY());
 		}
-		if (itemA.getRight() < itemB.getLeft()) {
-			collisionVector.setX(itemB.getLeft() - itemA.getRight());
-		} else if (itemA.getLeft() > itemB.getRight()) {
-			collisionVector.setX(itemB.getRight() - itemA.getLeft());
+		if (rectA.getMaxX() < rectB.x) {
+			collisionVector.x = (int) (rectB.x - rectA.getMaxX());
+		} else if (rectA.x > rectB.getMaxX()) {
+			collisionVector.x = (int) (rectB.getMaxX() - rectA.x);
 		}
 		return collisionVector;
 	}
 	
+	private Point getNewPoint(Sprite item) {
+		Point newpos = new Point();
+		newpos.x = item.getX();
+		newpos.y = item.getY();
+		newpos.x += item.getVelocity().x;
+		newpos.y += item.getVelocity().y;
+		return newpos;
+	}
+	
 	private boolean checkCollisions(Sprite item, Map map, GameEventManager gem) {
 		boolean rv = false;
-		Position collisionVector = null;
-		Position newpos = new Position();
-		newpos.copy(item.getPosition());
-		newpos.add(item.getVelocity());
+		Point collisionVector = null;
+		Point newpos = getNewPoint(item);
 		
-		int minX = newpos.getX() - Sprite.TileWidth * 2;
-		int maxX = newpos.getX() + item.getSize().getWidth();
+		int minX = newpos.x - Sprite.TILE_WIDTH * 2;
+		int maxX = newpos.x + item.getBounds().width;
 		
-		Vector<Sprite> sprites = map.getRange(minX, maxX);
-		for(Sprite that : sprites) {
+		m_tiles = map.getRange(minX, maxX).toArray(m_tiles);
+		for(Tile that : m_tiles) {
 			if (isInCollision(item, newpos, that)) {
-				collisionVector = getCollisionVector(item, that);
+				collisionVector = getCollisionVector(item.getBounds(), that.getBounds());
 				if (that.getClass() == Coin.class) {
-					System.err.println(String.format("CV: {x: %d, y: %d}", collisionVector.getX(), collisionVector.getY()));
+					System.err.println(String.format("CV: {x: %d, y: %d}", collisionVector.x, collisionVector.y));
 				}
 				GameEventType ev = that.onCollision(item, collisionVector);
 				if (ev == GameEventType.PreventCollision) {
-					if (Math.abs(collisionVector.getX()) > Math.abs(collisionVector.getY())) {
-						item.getVelocity().setX(0);
+					if (Math.abs(collisionVector.x) > Math.abs(collisionVector.y)) {
+						item.getVelocity().x = 0;
 					} else {
-						item.getVelocity().setY(0);
+						item.getVelocity().y = 0;
 					}
 				} else if (ev != GameEventType.NoEvent) {
 					gem.fireEvent(ev, that);
 				}
 				
 			}
-			
 		}
 		return rv;
 	}
@@ -101,11 +113,11 @@ public class MovementManager {
 	}
 	
 	private void applyDrag(Sprite item) {
-		m_dragFV.setX((int) Math.round(-0.5 * item.getVelocity().getX()));
+		m_dragFV.x = (int) Math.round(-0.6 * item.getVelocity().x);
 		item.applyForce(m_dragFV);
 	}
 	
-	public void applyInputForce(Sprite player, Position inputFV) {
+	public void applyInputForce(Sprite player, Point inputFV) {
 		player.applyForce(inputFV);
 		if (inputFV.getX() == 0) {
 			applyDrag(player);

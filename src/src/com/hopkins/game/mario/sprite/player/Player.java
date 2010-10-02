@@ -2,12 +2,12 @@ package com.hopkins.game.mario.sprite.player;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 
-import com.hopkins.game.mario.GameState;
-import com.hopkins.game.mario.sprite.Position;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteCache;
 
@@ -18,12 +18,12 @@ public class Player extends Sprite {
 	private Graphics m_bg;
 	private int m_playerIndex;
 	private int m_animationIndex;
-	private PlayerState m_ps;
+	private PlayerSize m_ps;
 	private boolean m_hasStar;
 	private boolean m_direction;
 	private boolean m_inJump;
 	private boolean m_isDucking;
-	private Position m_forceVector;
+	private Point m_forceVector;
 	
 	public int getPlayerIndex() { 
 		return m_playerIndex;
@@ -45,14 +45,14 @@ public class Player extends Sprite {
 		m_isDucking = isDucking;
 	}
 	
-	public PlayerState getPlayerState() {
+	public PlayerSize getPlayerState() {
 		return m_ps;
 	}
-	public void setPlayerState(PlayerState ps) {
+	public void setPlayerState(PlayerSize ps) {
 		m_ps = ps;
 	}
 	
-	public Player(int index, PlayerState playerState) {
+	public Player(int index, PlayerSize playerState) {
 		m_clear = new BufferedImage(16, 32, IndexColorModel.TRANSLUCENT);
 		m_buffer = new BufferedImage(16, 32, IndexColorModel.TRANSLUCENT);
 		m_bg = m_buffer.getGraphics();
@@ -62,19 +62,19 @@ public class Player extends Sprite {
 		m_inJump = false;
 		m_isDucking = false;
 		m_animationIndex = 0;
-		m_forceVector = new Position();
-		if (m_ps == PlayerState.Small) {
-			getSize().set(16, 16);
+		m_forceVector = new Point();
+		if (m_ps == PlayerSize.Small) {
+			setSize(16, 16);
 		} else {
-			getSize().set(16, 32);
+			setSize(16, 32);
 		}
 		
 		// load sprites
 		loadSprites();
 	}
 	
-	public void applyInputForce(Position forceVector) {
-		m_forceVector.setX(forceVector.getX());
+	public void applyInputForce(Point forceVector) {
+		m_forceVector.x = forceVector.x;
 		super.applyForce(forceVector);
 	}
 	
@@ -82,7 +82,7 @@ public class Player extends Sprite {
 	private void loadSprites() {
 		SpriteCache sm = SpriteCache.get();
 		for(String playerName : new String[] {"Mario"}) {
-			for (PlayerState ps : PlayerState.values()) {
+			for (PlayerSize ps : PlayerSize.values()) {
 				String srcPath = String.format("player/%s-%s.png", 
 						playerName.toLowerCase(), ps.toString().toLowerCase());
 				String rightPath = getSpritePath(playerName, ps, false); 
@@ -99,9 +99,9 @@ public class Player extends Sprite {
 				h = src.getHeight(null);
 				BufferedImage flipped = new BufferedImage(w, h, IndexColorModel.TRANSLUCENT);
 				// loop through each sub sprite
-				for (int i = 0; i < w / Sprite.TileWidth; i++) {
-					int left = 0 + i * Sprite.TileWidth;
-					int right = left + Sprite.TileWidth;
+				for (int i = 0; i < w / Sprite.TILE_WIDTH; i++) {
+					int left = 0 + i * Sprite.TILE_WIDTH;
+					int right = left + Sprite.TILE_WIDTH;
 					// copy the sub sprite and flip it
 					flipped.getGraphics().drawImage(src, 
 							left, 0, right, h, 
@@ -118,7 +118,7 @@ public class Player extends Sprite {
 		return getSpritePath(getPlayerName(), m_ps, m_direction);
 	}
 	
-	private String getSpritePath(String playerName, PlayerState state, boolean direction) {
+	private String getSpritePath(String playerName, PlayerSize state, boolean direction) {
 		return String.format("player/%s-%s-%d.png", 
 				playerName.toLowerCase(), state.toString().toLowerCase(), (direction ? 1 : 0));
 	}
@@ -130,9 +130,9 @@ public class Player extends Sprite {
 	public Image getImage() {
 		Image src = SpriteCache.get().getSprite(getSpritePath());
 		int frameIndex = 0;
-		int vx = getVelocity().getX();
-		int vy = getVelocity().getY();
-		int fx = m_forceVector.getX();
+		int vx = getVelocity().x;
+		int vy = getVelocity().y;
+		int fx = m_forceVector.x;
 		if (vx != 0) {
 			m_direction = (vx < 0);
 		}
@@ -142,21 +142,21 @@ public class Player extends Sprite {
 			m_inJump = false;
 		}
 		if (m_inJump) {
-			if (m_ps == PlayerState.Small) {
+			if (m_ps == PlayerSize.Small) {
 				frameIndex = 3;
 			} else {
 				frameIndex = 4;
 			}
-		} else if ((m_isDucking) && (m_ps != PlayerState.Small)) {
+		} else if ((m_isDucking) && (m_ps != PlayerSize.Small)) {
 			frameIndex = 5;
 		} else if (signDifferent(vx, fx)) {
-			if (m_ps == PlayerState.Small) {
+			if (m_ps == PlayerSize.Small) {
 				frameIndex = 2;
 			} else {
 				frameIndex = 3;
 			}
 		} else if (getVelocity().getX() != 0) {
-			if (m_ps == PlayerState.Small) {
+			if (m_ps == PlayerSize.Small) {
 				frameIndex = (m_animationIndex % 2);
 			} else {
 				frameIndex = (m_animationIndex % 3);
@@ -164,16 +164,20 @@ public class Player extends Sprite {
 			m_animationIndex++;
 		}
 		
-		int left = frameIndex * Sprite.TileWidth;
-		int right = left + Sprite.TileWidth;
+		int left = frameIndex * Sprite.TILE_WIDTH;
+		int right = left + Sprite.TILE_WIDTH;
 		m_buffer.setData(m_clear.getData());
 		m_bg.drawImage(src,
-					0, 0, getSize().getWidth(), getSize().getHeight(), 
-					left, 0, right, getSize().getHeight(), null);
+					0, 0, getBounds().width, getBounds().height, 
+					left, 0, right, getBounds().height, null);
 		m_buffer.flush();
 		return m_buffer;
 	}
 	public boolean isActive() {
 		return true;
+	}
+	
+	public void render(Graphics2D g, Point p, int tick) {
+		g.drawImage(getImage(), p.x, p.y, null);
 	}
 }

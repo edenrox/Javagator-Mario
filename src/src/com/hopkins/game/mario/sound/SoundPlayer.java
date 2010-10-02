@@ -8,32 +8,31 @@ public class SoundPlayer implements Runnable {
 	
 	public static final String PathToSounds = "C:\\Users\\Ian\\projects\\Icadev\\SideScroller\\sounds\\";
 	
-	private HashMap<String, AudioInputStream> m_ais;
-	private Clip m_lastClip;
+	private HashMap<String, Clip> m_clips;
 	
 	public SoundPlayer() {
-		m_ais = new HashMap<String, AudioInputStream>();
-		m_lastClip = null;
-
+		m_clips = new HashMap<String, Clip>();
 	}
 
 	public void run() {
 		
-		
 	}
 	
 	public void play(String path) {
-		if (!m_ais.containsKey(path)) {
+		if (!m_clips.containsKey(path)) {
 			 load(path);
 		}
-		if (m_lastClip != null) {
-			m_lastClip.stop();
-		}
 		try {
-			Clip clip = AudioSystem.getClip();
-			clip.open(m_ais.get(path));
+			
+			
+			Clip clip = m_clips.get(path);
+			if (clip.isRunning()) {
+				clip.stop();
+			}
 			clip.setFramePosition(0);
 			clip.start();
+			
+
 
 		} catch (Exception ex) {
 			System.err.println("Error, could not play audio: " + path + " " + ex.toString());
@@ -44,7 +43,9 @@ public class SoundPlayer implements Runnable {
 		String file_path = PathToSounds + path; 
 		try {
 			AudioInputStream ais = AudioSystem.getAudioInputStream(new File(file_path));
-			m_ais.put(path, ais);
+			Clip clip = AudioSystem.getClip();
+			clip.open(ais);
+			m_clips.put(path, clip);
 		} catch (Exception ex) {
 			System.err.println("Error, could not read audio: " + path + " " + ex.toString());
 		}

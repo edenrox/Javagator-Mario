@@ -3,10 +3,10 @@ package com.hopkins.game.mario.sound;
 import com.hopkins.game.mario.events.GameEventListener;
 import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.sprite.Sprite;
-import com.hopkins.game.mario.sprite.powerups.Coin;
 import com.hopkins.game.mario.sprite.powerups.Flower;
 import com.hopkins.game.mario.sprite.powerups.Mushroom;
 import com.hopkins.game.mario.sprite.powerups.OneUp;
+import com.hopkins.game.mario.sprite.tiles.Coin;
 
 public class SoundManager implements GameEventListener {
 	
@@ -27,6 +27,8 @@ public class SoundManager implements GameEventListener {
 		switch(ev) {
 			case BrickBreak:
 				return "brickbreak.wav";
+			case Death:
+				return "death.wav";
 			case Jump:
 				return "jump.wav";
 			case Collect:
