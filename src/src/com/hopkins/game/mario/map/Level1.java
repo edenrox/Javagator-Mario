@@ -69,7 +69,7 @@ public class Level1 {
 		
 		m_map.add(TileFactory.createSpawn("goomba"), 41, 12);
 		addPipe(46, 9, 4);
-		m_map.add(TileFactory.createSpawn("goomba"), 53, 12);
+		m_map.add(TileFactory.createSpawn("goomba"), 52, 12);
 		m_map.add(TileFactory.createSpawn("goomba"), 54, 12);
 		
 		addPipe(57, 9, 4);
@@ -94,6 +94,7 @@ public class Level1 {
 		m_map.create("brick", 100, 9);
 		addQuestionBlock(101, 9, "star");
 		addQuestionBlock(106, 9, "coin");
+		m_map.add(TileFactory.createSpawn("koopa"), 106, 4);
 		addQuestionBlock(109, 9, "coin");
 		addQuestionBlock(109, 5, "mushroom");
 		addQuestionBlock(112, 9, "coin");
@@ -145,6 +146,13 @@ public class Level1 {
 		}
 		
 		blockPile(198, 1);
+		flagPole(198, 10);
+		
+		m_map.add(new Castle(false), 202, 8);
+	}
+	
+	private void flagPole(int x, int height) {
+		
 	}
 	
 	private void blockPile(int x, int height) {

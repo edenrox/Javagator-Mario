@@ -23,7 +23,7 @@ public class MainRenderer implements Renderer {
 	public MainRenderer() {
 		m_tick = 0;
 		m_visible = new Rectangle(0, 0, ContentPanel.WIDTH, ContentPanel.HEIGHT);
-		m_active = new Vector<Sprite>();
+		m_active = null;
 		m_tbr = new TopBarRenderer();
 	}
 	
@@ -31,8 +31,8 @@ public class MainRenderer implements Renderer {
 		m_tbr.setPlayerState(ps);
 	}
 	
-	public Vector<Sprite> getActiveSprites() {
-		return m_active;
+	public void setActiveSprites(Vector<Sprite> active) {
+		m_active = active;
 	}
 
 	public Map getMap() {

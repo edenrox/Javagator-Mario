@@ -4,9 +4,12 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import com.hopkins.game.mario.events.GameEventType;
+import com.hopkins.game.mario.movement.MovementManager;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteCache;
 import com.hopkins.game.mario.sprite.SpriteFactory;
+import com.hopkins.game.mario.sprite.player.Player;
+import com.hopkins.game.mario.sprite.player.PlayerSize;
 
 public class QuestionBox extends Block {
 	public static final int FRAMES = 4;
@@ -30,13 +33,27 @@ public class QuestionBox extends Block {
 	}
 	
 	public GameEventType onCollision(Sprite that, Point collisionVector) {
-		if (m_quantity < 1) {
+  		if (m_quantity < 1) {
 			return super.onCollision(that, collisionVector);
 		}
-		
-		// create the new item
-		m_creating = SpriteFactory.create(m_contains);
-		m_creating.setLocation(this.getX(), this.getY());
+  		if (that.getClass() == Player.class) {
+			if (collisionVector.y < 0) {
+				if (m_contains == "coin") {
+					
+				} else {
+					if (m_contains == "mushroom") {
+						Player p = (Player) that;
+						if (p.getPlayerSize() != PlayerSize.Small)
+						m_contains = "flower";
+					}
+					// create the new item
+					m_creating = SpriteFactory.create(m_contains);
+					m_creating.setLocation(this.getX(), this.getY() - TILE_HEIGHT);
+					MovementManager.get().spawn(m_creating);
+				}
+				m_quantity--;
+			}
+  		}
 		
 		return GameEventType.PreventCollision;
 	}

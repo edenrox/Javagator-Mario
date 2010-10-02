@@ -8,6 +8,7 @@ import com.hopkins.game.mario.input.KeyboardManager;
 import com.hopkins.game.mario.utils.DelayHelper;
 
 public abstract class Controller implements Runnable, KeyReleaseHandler {
+	public static final int RENDER_PERIOD = 50;
 	
 	private KeyboardManager m_km;
 	private WindowManager m_wm;
@@ -51,7 +52,7 @@ public abstract class Controller implements Runnable, KeyReleaseHandler {
 		while (!m_done) {
 			run();
 			render();
-			DelayHelper.sleep(50);
+			DelayHelper.sleep(RENDER_PERIOD);
 		}
 	}
 	

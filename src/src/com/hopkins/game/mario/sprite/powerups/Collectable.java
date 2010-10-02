@@ -11,6 +11,12 @@ public abstract class Collectable extends ImageSprite {
 		return false;
 	}
 	
+	public void onPreventCollision(Sprite that, Point collisionVector) {
+		if (collisionVector.x != 0) {
+			getVelocity().x = -1 * getVelocity().x;
+		}
+	}
+	
 	public GameEventType onCollision(Sprite that, Point collisionVector) {
 		if (that.getClass() == Player.class) {
 			return GameEventType.Collect;

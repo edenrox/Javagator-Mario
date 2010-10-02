@@ -5,6 +5,7 @@ import java.util.Date;
 import com.hopkins.game.mario.events.GameEventListener;
 import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.sprite.Sprite;
+import com.hopkins.game.mario.sprite.powerups.OneUp;
 import com.hopkins.game.mario.sprite.tiles.Coin;
 
 public class PlayerState implements GameEventListener {
@@ -60,6 +61,13 @@ public class PlayerState implements GameEventListener {
 			case Collect:
 				if (target.getClass() == Coin.class) {
 					m_coins += 1;
+					if (m_coins == 100) {
+						// throw new game event here
+						m_coins = 0;
+					}
+				}
+				if (target.getClass() == OneUp.class) {
+					m_lives += 1;
 				}
 				m_points += 50;
 			case StompBadGuy:

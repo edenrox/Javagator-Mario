@@ -7,5 +7,5 @@ public enum GameEventType {
 	Jump,
 	TouchBadGuy,StompBadGuy,Bounce,
 	LevelComplete,PipeEnter,PipeExit,
-	Death,
+	Injure, Death, Fireball,
 }

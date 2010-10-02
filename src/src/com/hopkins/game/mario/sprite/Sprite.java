@@ -41,11 +41,16 @@ public abstract class Sprite implements Renderable {
 	public int getMaxVelocity() {
 		return 6;
 	}
-	
+	public void onPreventCollision(Sprite that, Point collisionVector) {
+		
+	}
 	public GameEventType onCollision(Sprite that, Point collisionVector) {
 		return (this.isSolid()) ? GameEventType.PreventCollision : GameEventType.NoEvent;
 	}
 	public boolean isSolid() {
+		return true;
+	}
+	public boolean respectsSolids() {
 		return true;
 	}
 	public boolean isGravityEffected() {

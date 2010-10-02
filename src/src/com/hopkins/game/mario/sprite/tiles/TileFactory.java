@@ -1,7 +1,5 @@
 package com.hopkins.game.mario.sprite.tiles;
 
-import com.hopkins.game.mario.map.Map;
-
 public class TileFactory {
 
 	public static Tile create(String name) {

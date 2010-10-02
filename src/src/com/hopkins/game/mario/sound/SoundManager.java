@@ -27,6 +27,8 @@ public class SoundManager implements GameEventListener {
 		switch(ev) {
 			case BrickBreak:
 				return "brickbreak.wav";
+			case Fireball:
+				return "fireball.wav";
 			case Death:
 				return "death.wav";
 			case Jump:

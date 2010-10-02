@@ -2,27 +2,52 @@ package com.hopkins.game.mario.movement;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.Collection;
-
+import java.util.Vector;
 import com.hopkins.game.mario.events.GameEventManager;
 import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.map.Map;
 import com.hopkins.game.mario.sprite.*;
-import com.hopkins.game.mario.sprite.tiles.Coin;
+import com.hopkins.game.mario.sprite.player.Player;
+import com.hopkins.game.mario.sprite.projectile.Fireball;
 import com.hopkins.game.mario.sprite.tiles.Tile;
 
 public class MovementManager {
 	
 	public static final int GRAVITY_FORCE = 1;
 	
+	private static MovementManager s_instance;
 	private Point m_gravityFV;
 	private Point m_dragFV;
-	private Tile[] m_tiles;
+	private Vector<Sprite> m_items;
+	private Sprite[] m_sprites;
+	private Vector<Sprite> m_active;
+	private Map m_map;
 	
-	public MovementManager() {
+	private MovementManager() {
 		m_gravityFV = new Point(0, GRAVITY_FORCE);
 		m_dragFV = new Point(0, 0);
-		m_tiles = new Tile[10];
+		m_items = new Vector<Sprite>(10);
+		m_sprites = new Sprite[10];
+	}
+	
+	public static MovementManager get() {
+		if (s_instance == null) {
+			s_instance = new MovementManager();
+		}
+		return s_instance;
+	}
+	
+	public void spawn(Sprite item) {
+		m_active.add(item);
+	}
+	
+	public void remove(Sprite item) {
+		if (Tile.class.isAssignableFrom(item.getClass())) {
+			m_map.remove((Tile) item);
+		} else {
+			// or the active sprites (mushrooms, oneups, stars)
+			m_active.remove(item);
+		}
 	}
 	
 	private void limitVelocity(Sprite item) {
@@ -42,7 +67,7 @@ public class MovementManager {
 	}
 	
 	private boolean isInCollision(Sprite itemA, Point newPosA, Sprite itemB) {
-		if (itemB == null) {
+		if ((itemB == null) || (itemA == itemB)) {
 			return false;
 		}
 		Rectangle rectA = new Rectangle(newPosA.x, newPosA.y, itemA.getBounds().width, itemA.getBounds().height);
@@ -52,61 +77,78 @@ public class MovementManager {
 	}
 	
 	
-	private Point getCollisionVector(Rectangle rectA, Rectangle rectB) {
+	private void checkCollisions(Sprite item, GameEventManager gem) {
 		Point collisionVector = new Point();
+		Point newpos = new Point(item.getX(), item.getY());
+		Rectangle itemRect = new Rectangle(item.getBounds());
+		Rectangle overlap = null;
+		int magnitude = 0;
+		int temp = 0;
 		
-		// we are below, but our top is above this items bottom
-		if ((rectA.y <= rectB.getMaxY()) && (rectA.getMaxY() >= rectB.getMaxY())) {
-			collisionVector.y = (int) (rectB.getMaxY() - rectA.y);
-		} else if ((rectA.getMaxY() >= rectB.getY()) && (rectA.y <= rectB.y)) {
-			collisionVector.y = (int) (rectB.getY() - rectA.getMaxY());
-		}
-		if (rectA.getMaxX() < rectB.x) {
-			collisionVector.x = (int) (rectB.x - rectA.getMaxX());
-		} else if (rectA.x > rectB.getMaxX()) {
-			collisionVector.x = (int) (rectB.getMaxX() - rectA.x);
-		}
-		return collisionVector;
-	}
-	
-	private Point getNewPoint(Sprite item) {
-		Point newpos = new Point();
-		newpos.x = item.getX();
-		newpos.y = item.getY();
-		newpos.x += item.getVelocity().x;
-		newpos.y += item.getVelocity().y;
-		return newpos;
-	}
-	
-	private boolean checkCollisions(Sprite item, Map map, GameEventManager gem) {
-		boolean rv = false;
-		Point collisionVector = null;
-		Point newpos = getNewPoint(item);
+		// we need to detect and correct collisions one dimension at a time
+		for (int i = 0; i < 2; i++) {
 		
-		int minX = newpos.x - Sprite.TILE_WIDTH * 2;
-		int maxX = newpos.x + item.getBounds().width;
-		
-		m_tiles = map.getRange(minX, maxX).toArray(m_tiles);
-		for(Tile that : m_tiles) {
-			if (isInCollision(item, newpos, that)) {
-				collisionVector = getCollisionVector(item.getBounds(), that.getBounds());
-				if (that.getClass() == Coin.class) {
-					System.err.println(String.format("CV: {x: %d, y: %d}", collisionVector.x, collisionVector.y));
+			if (i == 0) {
+				// x direction
+				magnitude = item.getVelocity().x;
+				collisionVector.x = magnitude;
+				newpos.x += magnitude;
+				itemRect.x = newpos.x;
+			} else {
+				// y direction
+				magnitude = item.getVelocity().y;
+				collisionVector.x = 0;
+				collisionVector.y = magnitude;
+				newpos.y += magnitude;
+				itemRect.y = newpos.y;
+			}
+			if (magnitude != 0) {
+			
+				// define the search params
+				int minX = newpos.x - Sprite.TILE_WIDTH * 2;
+				int maxX = newpos.x + item.getBounds().width;
+				m_items.clear();
+				for(Tile tile : m_map.getRange(minX, maxX)) {
+					m_items.add(tile);
 				}
-				GameEventType ev = that.onCollision(item, collisionVector);
-				if (ev == GameEventType.PreventCollision) {
-					if (Math.abs(collisionVector.x) > Math.abs(collisionVector.y)) {
-						item.getVelocity().x = 0;
-					} else {
-						item.getVelocity().y = 0;
-					}
-				} else if (ev != GameEventType.NoEvent) {
-					gem.fireEvent(ev, that);
+				for(Sprite sprite : m_active) {
+					m_items.add(sprite);
 				}
 				
+				// loop through the tiles found and test for collisions
+				for(Sprite that : m_items) {
+					if (isInCollision(item, newpos, that)) {
+						if (item.getClass() == Fireball.class) {
+							temp++;
+						}
+						GameEventType ev = that.onCollision(item, collisionVector);
+						if (ev == GameEventType.PreventCollision) {
+							item.onPreventCollision(that, collisionVector);
+							overlap = itemRect.intersection(that.getBounds());
+							if (i == 0) {
+								if (magnitude > 1) {
+									newpos.x -= overlap.width;
+								} else {
+									newpos.x += overlap.width;
+								}
+							} else {
+								if (magnitude > 1) {
+									newpos.y -= overlap.height;
+								} else {
+									newpos.y += overlap.height;
+								}
+							}
+						} else if (ev != GameEventType.NoEvent) {
+							gem.fireEvent(ev, that);
+						}
+					}
+				}
 			}
 		}
-		return rv;
+		
+		
+		// move the sprite to the corrected position
+		item.setLocation(newpos.x, newpos.y);
 	}
 	private void applyGravity(Sprite item) {
 		item.applyForce(m_gravityFV);
@@ -124,13 +166,22 @@ public class MovementManager {
 		}
 	}
 	
-	public void applyForcesAndVelocities(Collection<Sprite> sprites, Map map, GameEventManager gem) {
-		for(Sprite item : sprites) {
-			// limit velocities, check for collisions, then apply velocities
-			applyGravity(item);
-			limitVelocity(item);
-			checkCollisions(item, map, gem);
-			item.applyVelocity();
+	public void applyForcesAndVelocities(GameEventManager gem) {
+		m_sprites = m_active.toArray(m_sprites);
+		for(Sprite item : m_sprites) {
+			if (item != null) {
+				// limit velocities, check for collisions, then apply velocities
+				applyGravity(item);
+				limitVelocity(item);
+				checkCollisions(item, gem);
+			}
 		}
+	}
+
+	public void setActiveSprites(Vector<Sprite> active) {
+		m_active = active;
+	}
+	public void setMap(Map map) {
+		m_map = map;
 	}
 }

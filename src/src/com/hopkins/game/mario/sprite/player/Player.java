@@ -1,6 +1,5 @@
 package com.hopkins.game.mario.sprite.player;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -12,7 +11,7 @@ import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteCache;
 
 public class Player extends Sprite {
-	private static final String[] PLAYER_NAMES = {"Mario", "Luigi"};
+	public static final int BIG_HEIGHT = 28;
 	private BufferedImage m_buffer;
 	private BufferedImage m_clear;
 	private Graphics m_bg;
@@ -23,7 +22,12 @@ public class Player extends Sprite {
 	private boolean m_direction;
 	private boolean m_inJump;
 	private boolean m_isDucking;
+	private boolean m_onGround;
 	private Point m_forceVector;
+	
+	public boolean isOnGround() {
+		return m_onGround;
+	}
 	
 	public int getPlayerIndex() { 
 		return m_playerIndex;
@@ -44,12 +48,22 @@ public class Player extends Sprite {
 	public void setDucking(boolean isDucking) {
 		m_isDucking = isDucking;
 	}
-	
-	public PlayerSize getPlayerState() {
+	public boolean isSolid() {
+		return false;
+	}
+	public PlayerSize getPlayerSize() {
 		return m_ps;
 	}
-	public void setPlayerState(PlayerSize ps) {
+	public void setPlayerSize(PlayerSize ps) {
+		if ((m_ps == PlayerSize.Small) && (ps != PlayerSize.Small)) {
+			setSize(TILE_WIDTH, BIG_HEIGHT);
+			setLocation(getX(), getY() - (BIG_HEIGHT - TILE_HEIGHT));
+		} else if ((m_ps != PlayerSize.Small) && (ps == PlayerSize.Small)) {
+			setSize(TILE_WIDTH, TILE_HEIGHT);
+			setLocation(getX(), getY() + (BIG_HEIGHT - TILE_HEIGHT));
+		}
 		m_ps = ps;
+		
 	}
 	
 	public Player(int index, PlayerSize playerState) {
@@ -66,7 +80,7 @@ public class Player extends Sprite {
 		if (m_ps == PlayerSize.Small) {
 			setSize(16, 16);
 		} else {
-			setSize(16, 32);
+			setSize(16, BIG_HEIGHT);
 		}
 		
 		// load sprites
@@ -175,6 +189,9 @@ public class Player extends Sprite {
 	}
 	public boolean isActive() {
 		return true;
+	}
+	public boolean isLookingLeft() {
+		return m_direction;
 	}
 	
 	public void render(Graphics2D g, Point p, int tick) {

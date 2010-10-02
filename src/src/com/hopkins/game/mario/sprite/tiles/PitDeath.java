@@ -5,6 +5,7 @@ import java.awt.Point;
 
 import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.sprite.Sprite;
+import com.hopkins.game.mario.sprite.player.Player;
 
 public class PitDeath extends Tile {
 
@@ -17,7 +18,11 @@ public class PitDeath extends Tile {
 		return false;
 	}
 	public GameEventType onCollision(Sprite that, Point collisionVector) {
-		return GameEventType.Death;
+		if (that.getClass() == Player.class) {
+			return GameEventType.Death;
+		} else {
+			return GameEventType.NoEvent;
+		}
 	}
 	
 	public void render(Graphics2D g, Point p, int tick) {
