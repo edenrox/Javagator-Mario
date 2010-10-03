@@ -4,8 +4,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 
-import com.hopkins.game.mario.events.GameEventType;
-import com.hopkins.game.mario.movement.MovementManager;
+import com.hopkins.game.mario.events.GameEventManager;
+import com.hopkins.game.mario.movement.CollisionResponse;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteCache;
 import com.hopkins.game.mario.sprite.enemies.Enemy;
@@ -31,7 +31,7 @@ public class Fireball extends Sprite {
 		if (collisionVector.y != 0) {
 			getVelocity().y = -1 * getVelocity().y;
 		} else if (collisionVector.x != 0) {
-			MovementManager.get().remove(this);
+			GameEventManager.get().remove(this);
 		}
 	}
 	
@@ -39,11 +39,11 @@ public class Fireball extends Sprite {
 		return false;
 	}
 	
-	public GameEventType onCollision(Sprite item, Point collisionVector) {
+	public CollisionResponse onCollision(Sprite item, Point collisionVector) {
 		if (Enemy.class.isAssignableFrom(item.getClass())) {
-			MovementManager.get().remove(item);
-			MovementManager.get().remove(this);
-			return GameEventType.StompBadGuy;
+			GameEventManager.get().remove(item);
+			GameEventManager.get().remove(this);
+			return CollisionResponse.Block;
 		}
 		return super.onCollision(item, collisionVector);
 	}

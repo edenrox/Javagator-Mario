@@ -3,7 +3,7 @@ package com.hopkins.game.mario.sprite.tiles;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
-import com.hopkins.game.mario.movement.MovementManager;
+import com.hopkins.game.mario.events.GameEventManager;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteFactory;
 
@@ -31,7 +31,7 @@ public class Spawn extends Tile {
 		if (!m_done) {
 			Sprite item = SpriteFactory.create(m_type);
 			item.setLocation(this.getX(), this.getY());
-			MovementManager.get().spawn(item);
+			GameEventManager.get().spawn(item);
 			m_done = true;
 		}
 	}

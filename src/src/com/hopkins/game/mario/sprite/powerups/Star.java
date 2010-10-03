@@ -1,8 +1,6 @@
 package com.hopkins.game.mario.sprite.powerups;
 
 import java.awt.Point;
-
-import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.sprite.Sprite;
 
 public class Star extends Collectable {
@@ -16,11 +14,12 @@ public class Star extends Collectable {
 		return "powerups/star.png";
 	}
 	
-	public GameEventType onCollision(Sprite that, Point collisionVector) {
-		if ((that.isSolid()) && (collisionVector.y > 0)) {
-			getVelocity().y = 4;
+	public void onPreventCollision(Sprite that, Point collisionVector) {
+		if (collisionVector.y != 0) {
+			getVelocity().y = -1 * getVelocity().y;
+		} else if (collisionVector.x != 0) {
+			getVelocity().x = -1 * getVelocity().x;
 		}
-		return super.onCollision(that, collisionVector);
 	}
 
 }

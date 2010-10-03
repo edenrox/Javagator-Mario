@@ -4,7 +4,12 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 
+import com.hopkins.game.mario.events.GameEventManager;
+import com.hopkins.game.mario.events.GameEventType;
+import com.hopkins.game.mario.movement.CollisionResponse;
+import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteCache;
+import com.hopkins.game.mario.sprite.player.Player;
 
 public class Koopa extends Enemy {
 	public static final int HEIGHT = 27;
@@ -70,5 +75,29 @@ public class Koopa extends Enemy {
 		g.drawImage(fire, p.x, p.y + y, p.x + TILE_WIDTH, p.y + y +HEIGHT, 
 						x, y, x + TILE_WIDTH, HEIGHT, null);
 	}
-
+	
+	public CollisionResponse onCollision(Sprite that, Point collisionVector) {
+		if (checkStomp(that, collisionVector)) {
+			if (m_state == KoopaState.Walk) {
+				GameEventManager.get().fireEvent(GameEventType.StompBadGuy, this);
+				setState(KoopaState.Still);
+			} else if (m_state == KoopaState.Slide) {
+				setState(KoopaState.Still);
+			} else if (m_state == KoopaState.Still) {
+				if (that.getX() != this.getX()) {
+					if (this.getX() < that.getX()) {
+						getVelocity().x = -4;
+					} else {
+						getVelocity().x = 4;
+					}
+					setState(KoopaState.Slide);	
+				}
+			}
+			return CollisionResponse.Bounce;
+		} else if (that.getClass() == Player.class) {
+			GameEventManager.get().fireEvent(GameEventType.Injure, this);
+			return CollisionResponse.Overlap;
+		}
+		return CollisionResponse.Block;
+	}
 }

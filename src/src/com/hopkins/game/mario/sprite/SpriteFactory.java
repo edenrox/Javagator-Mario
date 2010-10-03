@@ -4,6 +4,7 @@ import com.hopkins.game.mario.sprite.enemies.Goomba;
 import com.hopkins.game.mario.sprite.enemies.Koopa;
 import com.hopkins.game.mario.sprite.enemies.KoopaState;
 import com.hopkins.game.mario.sprite.powerups.*;
+import com.hopkins.game.mario.sprite.projectile.BounceCoin;
 import com.hopkins.game.mario.sprite.tiles.Coin;
 
 public class SpriteFactory {
@@ -27,13 +28,13 @@ public class SpriteFactory {
 		if (name.equals("goomba")) {
 			return new Goomba();
 		}
-		if (name.equals("koopa")) {
-			return new Koopa();
+		if (name.equals("bounce-coin")) {
+			return new BounceCoin();
 		}
 		if (name.startsWith("koopa")) {
 			String[] parts = name.split("-");
 			Koopa item = new Koopa();
-			if (parts.length > 0) {
+			if (parts.length > 1) {
 				if (parts[1] == "shell") {
 					item.setState(KoopaState.Still);
 				} else if (parts[1] == "flying") {

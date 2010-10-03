@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.graphics.Renderable;
+import com.hopkins.game.mario.movement.CollisionResponse;
 
 public abstract class Sprite implements Renderable {
 
@@ -44,8 +45,8 @@ public abstract class Sprite implements Renderable {
 	public void onPreventCollision(Sprite that, Point collisionVector) {
 		
 	}
-	public GameEventType onCollision(Sprite that, Point collisionVector) {
-		return (this.isSolid()) ? GameEventType.PreventCollision : GameEventType.NoEvent;
+	public CollisionResponse onCollision(Sprite that, Point collisionVector) {
+		return (this.isSolid()) ?CollisionResponse.Block : CollisionResponse.Overlap;
 	}
 	public boolean isSolid() {
 		return true;

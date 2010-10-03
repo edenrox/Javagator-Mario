@@ -3,8 +3,9 @@ package com.hopkins.game.mario.sprite.tiles;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import com.hopkins.game.mario.events.GameEventType;
-import com.hopkins.game.mario.movement.MovementManager;
+
+import com.hopkins.game.mario.events.GameEventManager;
+import com.hopkins.game.mario.movement.CollisionResponse;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteCache;
 import com.hopkins.game.mario.sprite.SpriteFactory;
@@ -20,6 +21,9 @@ public class QuestionBox extends Block {
 
 	public QuestionBox(String contains, int quantity) {
 		super(BlockColor.Brown);
+		if (contains == "coin") {
+			contains = "bounce-coin";
+		}
 		m_quantity = quantity;
 		m_contains = contains;
 		m_creating = null;
@@ -32,30 +36,26 @@ public class QuestionBox extends Block {
 		return "tiles/block-question.png";
 	}
 	
-	public GameEventType onCollision(Sprite that, Point collisionVector) {
+	public CollisionResponse onCollision(Sprite that, Point collisionVector) {
   		if (m_quantity < 1) {
 			return super.onCollision(that, collisionVector);
 		}
   		if (that.getClass() == Player.class) {
 			if (collisionVector.y < 0) {
-				if (m_contains == "coin") {
-					
-				} else {
-					if (m_contains == "mushroom") {
-						Player p = (Player) that;
-						if (p.getPlayerSize() != PlayerSize.Small)
-						m_contains = "flower";
-					}
-					// create the new item
-					m_creating = SpriteFactory.create(m_contains);
-					m_creating.setLocation(this.getX(), this.getY() - TILE_HEIGHT);
-					MovementManager.get().spawn(m_creating);
+				if (m_contains == "mushroom") {
+					Player p = (Player) that;
+					if (p.getPlayerSize() != PlayerSize.Small)
+					m_contains = "flower";
 				}
+				// create the new item
+				m_creating = SpriteFactory.create(m_contains);
+				m_creating.setLocation(this.getX(), this.getY() - TILE_HEIGHT);
+				GameEventManager.get().spawn(m_creating);
 				m_quantity--;
 			}
   		}
 		
-		return GameEventType.PreventCollision;
+		return CollisionResponse.Block;
 	}
 	
 	public void render(Graphics2D g, Point p, int tick) {

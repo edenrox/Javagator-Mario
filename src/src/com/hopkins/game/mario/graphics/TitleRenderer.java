@@ -59,7 +59,7 @@ public class TitleRenderer implements Renderer {
 		if (m_step >= ANIMATION_STEPS) {
 			
 			x = rect.width / 6;
-			y = rect.height * 5 / 6;
+			y = rect.height * 5 / 6 - 20;
 			
 			g.setColor(Color.gray);
 			g.drawString(TEXT_ONE_PLAYER, x, y);
@@ -74,12 +74,20 @@ public class TitleRenderer implements Renderer {
 			if (m_players == 1) {
 				renderHighlight(g, x - 10, y);
 			}
+			
+			// Attribution
+			g.setColor(Color.white);
+			x = 10;
+			y += 25;
+			g.drawString("JavaGator Mario by: Ian Hopkins (http://www.icadev.com)", x, y);
+			y += 15;
+			g.drawString("Sprites & Sounds from: The ShyGuy Kingdom (http://tsgk.captainn.net/)", x, y);
 		}
 	}
 	
 	private void renderHighlight(Graphics2D g, int x, int y) {
 		g.setColor(Color.white);
-		g.fillOval(x, y - 8, 8, 8);
+		g.fillOval(x, y - 9, 9, 9);
 	}
 	
 }

@@ -17,7 +17,6 @@ import com.hopkins.game.mario.sprite.player.PlayerSize;
 import com.hopkins.game.mario.sprite.powerups.Flower;
 import com.hopkins.game.mario.sprite.powerups.Mushroom;
 import com.hopkins.game.mario.sprite.projectile.Fireball;
-import com.hopkins.game.mario.sprite.tiles.Coin;
 import com.hopkins.game.mario.sprite.tiles.Tile;
 import com.hopkins.game.mario.state.PlayerState;
 
@@ -38,6 +37,7 @@ public class MainController extends Controller implements GameEventListener {
 	private GameEventManager m_gem;
 	private PlayerState[] m_states;
 	private Vector<Sprite> m_active;
+	private Vector<Sprite> m_toremove;
 	
 	public void init() {
 		m_playerIndex = 0;
@@ -49,9 +49,13 @@ public class MainController extends Controller implements GameEventListener {
 		m_map = (new Level1()).getMap();
 		m_inputForceVector = new Point();
 		
+		
 		// setup the active sprites
 		m_active = new Vector<Sprite>();
 		m_active.add(m_player);
+		
+		// setup the remove list
+		m_toremove = new Vector<Sprite>();
 		
 		// setup the renderer
 		m_rend = new MainRenderer();
@@ -67,15 +71,13 @@ public class MainController extends Controller implements GameEventListener {
 	private void initManagers() {
 		
 		// setup the movement manager
-		m_mm = MovementManager.get();
-		m_mm.setActiveSprites(m_active);
-		m_mm.setMap(m_map);
+		m_mm = new MovementManager();
 		
 		// setup the sound manager
 		m_sm = new SoundManager();
 		
 		// setup the game event manager and its listeners
-		m_gem = new GameEventManager();
+		m_gem = GameEventManager.get();
 		m_gem.addListener(m_sm);
 		m_gem.addListener(this);
 		m_gem.addListener(m_states[m_playerIndex]);
@@ -93,14 +95,15 @@ public class MainController extends Controller implements GameEventListener {
 			if (m_player.getPlayerSize() == PlayerSize.Fire) {
 				Fireball fb = new Fireball(m_player.isLookingLeft());
 				fb.setLocation(m_player.getX(), m_player.getY() + 6);
-				m_mm.spawn(fb);
+				onSpawn(fb);
 				m_gem.fireEvent(GameEventType.Fireball, fb);
 			}
 			m_fire = false;
 		}
 		m_mm.applyInputForce(m_player, getInputForceVector());
-		m_mm.applyForcesAndVelocities(m_gem);
+		m_mm.applyForcesAndVelocities(m_map, m_active);
 		m_rend.setPlayerPosition(m_player.getX(), m_player.getY());
+		removeSprites();
 	}
 	
 	private Point getInputForceVector() {
@@ -151,6 +154,12 @@ public class MainController extends Controller implements GameEventListener {
 			case Death:
 				onDeath(target);
 				break;
+			case SpawnSprite:
+				onSpawn(target);
+				break;
+			case RemoveSprite:
+				onRemove(target);
+				break;
 		}
 	}
 	
@@ -160,12 +169,32 @@ public class MainController extends Controller implements GameEventListener {
 	
 	private void onCollect(Sprite target) {
 		// remove the item collected from either the map (flowers/coins)
-		m_mm.remove(target);
+		onRemove(target);
 		
 		if (target.getClass() == Mushroom.class) {
 			m_player.setPlayerSize(PlayerSize.Big);
 		} else if (target.getClass() == Flower.class) {
 			m_player.setPlayerSize(PlayerSize.Fire);
 		}
+	}
+	
+	public void onSpawn(Sprite target) {
+		m_active.add(target);
+	}
+	
+	public void onRemove(Sprite item) {
+		m_toremove.add(item);
+	}
+	
+	private void removeSprites() {
+		for(Sprite item : m_toremove) {
+			if (Tile.class.isAssignableFrom(item.getClass())) {
+				m_map.remove((Tile) item);
+			} else {
+				// or the active sprites (mushrooms, oneups, stars)
+				m_active.remove(item);
+			}
+		}
+		m_toremove.clear();
 	}
 }

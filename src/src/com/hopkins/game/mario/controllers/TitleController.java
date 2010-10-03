@@ -2,6 +2,7 @@ package com.hopkins.game.mario.controllers;
 
 import com.hopkins.game.mario.graphics.TitleRenderer;
 import com.hopkins.game.mario.input.ButtonType;
+import com.hopkins.game.mario.utils.DelayHelper;
 
 public class TitleController extends Controller {
 
@@ -12,6 +13,7 @@ public class TitleController extends Controller {
 		m_selected = false;
 		m_rend = new TitleRenderer();
 		setRenderer(m_rend);
+		//DelayHelper.sleep(10000);
 	}
 	
 	public void run() {

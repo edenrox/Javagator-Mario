@@ -2,10 +2,10 @@ package com.hopkins.game.mario.events;
 
 public enum GameEventType {
 	NoEvent,PreventCollision,
-	SpawnPowerup,BrickBreak,
+	SpawnSprite,RemoveSprite,
 	Collect,
 	Jump,
 	TouchBadGuy,StompBadGuy,Bounce,
 	LevelComplete,PipeEnter,PipeExit,
-	Injure, Death, Fireball,
+	Injure, Death, Fireball
 }

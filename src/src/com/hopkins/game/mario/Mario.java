@@ -12,7 +12,6 @@ public class Mario implements Runnable {
 	}
 	
 	public Mario() {
-		
 	}
 	
 	public void run() {

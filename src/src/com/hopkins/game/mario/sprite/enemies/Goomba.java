@@ -4,7 +4,9 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 
+import com.hopkins.game.mario.events.GameEventManager;
 import com.hopkins.game.mario.events.GameEventType;
+import com.hopkins.game.mario.movement.CollisionResponse;
 import com.hopkins.game.mario.movement.MovementManager;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.SpriteCache;
@@ -40,19 +42,13 @@ public class Goomba extends Enemy {
 		
 	}
 	
-	public GameEventType onCollision(Sprite that, Point collisionVector) {
+	public CollisionResponse onCollision(Sprite that, Point collisionVector) {
 		if (checkStomp(that, collisionVector)) {
-			MovementManager.get().remove(this);
-			return GameEventType.StompBadGuy;
+			GameEventManager.get().fireEvent(GameEventType.StompBadGuy, this);
+			GameEventManager.get().fireEvent(GameEventType.RemoveSprite, this);
 		} else if (that.getClass() == Player.class) {
-			return GameEventType.Injure;
-		} else {
-			if (that.isSolid()) {
-				// reverse directions
-				getVelocity().x = -1 * getVelocity().x;
-				return GameEventType.PreventCollision;
-			}
+			GameEventManager.get().fireEvent(GameEventType.Injure, this);
 		}
-		return GameEventType.NoEvent;
+		return CollisionResponse.Overlap;
 	}
 }

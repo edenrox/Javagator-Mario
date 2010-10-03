@@ -6,6 +6,7 @@ import com.hopkins.game.mario.events.GameEventListener;
 import com.hopkins.game.mario.events.GameEventType;
 import com.hopkins.game.mario.sprite.Sprite;
 import com.hopkins.game.mario.sprite.powerups.OneUp;
+import com.hopkins.game.mario.sprite.tiles.Brick;
 import com.hopkins.game.mario.sprite.tiles.Coin;
 
 public class PlayerState implements GameEventListener {
@@ -56,8 +57,10 @@ public class PlayerState implements GameEventListener {
 
 	public void onGameEvent(GameEventType type, Sprite target) {
 		switch(type) {
-			case BrickBreak:
-				m_points += 100;
+			case RemoveSprite:
+				if (target.getClass() == Brick.class) {
+					m_points += 100;
+				}
 			case Collect:
 				if (target.getClass() == Coin.class) {
 					m_coins += 1;
